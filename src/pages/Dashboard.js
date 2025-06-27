@@ -1,7 +1,4 @@
-// src/pages/Dashboard.js
-
 import React, { useEffect, useState } from 'react';
-import './Dashboard.css';
 import LineChart from './LineChart';
 
 export default function Dashboard() {
@@ -9,12 +6,10 @@ export default function Dashboard() {
   const [studyStats, setStudyStats] = useState({});
   const [currentTime, setCurrentTime] = useState(0);
 
-  // Load history from localStorage
   useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("sessionHistory")) || [];
 
     if (stored.length > 0) {
-      // Calculate stats
       const totalScore = stored.reduce((sum, entry) => sum + parseFloat(entry.score), 0);
       const avgScore = (totalScore / stored.length).toFixed(2);
 
@@ -32,7 +27,6 @@ export default function Dashboard() {
         totalTimeMinutes
       });
 
-      // Group by 30-minute intervals
       const grouped = {};
       stored.forEach(entry => {
         const timestamp = new Date(entry.timestamp).getTime();
@@ -64,7 +58,6 @@ export default function Dashboard() {
       setHistory(tableData);
     }
 
-    // Update live timer
     const interval = setInterval(() => {
       setCurrentTime(prev => prev + 1);
     }, 1000);
@@ -72,13 +65,11 @@ export default function Dashboard() {
     return () => clearInterval(interval);
   }, []);
 
-  // Helper: Get most common value
   const mode = (arr) =>
     arr.sort((a, b) =>
       arr.filter(v => v === a).length - arr.filter(v => v === b).length
     ).pop();
 
-  // Format seconds into hh:mm:ss
   const formatTime = (seconds) => {
     const h = Math.floor(seconds / 3600);
     const m = Math.floor((seconds % 3600) / 60);
@@ -87,70 +78,74 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="page dashboard">
-      <h2>📊 Your Learning Summary</h2>
+    <div className="min-h-screen bg-gray-900 text-white px-6 py-12 max-w-7xl mx-auto">
+      <h2 className="text-4xl font-extrabold mb-10 text-center">📊 Your Learning Summary</h2>
 
       {/* Summary Cards */}
-      <div className="summary">
-        <div className="card">
-          <h4>Average Score</h4>
-          <p>{studyStats.avgScore || "N/A"} / 10</p>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6 mb-12">
+        <div className="bg-gray-800 rounded-xl p-6 shadow-lg text-center">
+          <h4 className="text-lg font-semibold mb-2">Average Score</h4>
+          <p className="text-indigo-400 text-3xl">{studyStats.avgScore || "N/A"} / 10</p>
         </div>
 
-        <div className="card">
-          <h4>Total Tired/Rest Breaks</h4>
-          <p>{studyStats.tiredEntries || 0}</p>
+        <div className="bg-gray-800 rounded-xl p-6 shadow-lg text-center">
+          <h4 className="text-lg font-semibold mb-2">Total Tired/Rest Breaks</h4>
+          <p className="text-indigo-400 text-3xl">{studyStats.tiredEntries || 0}</p>
         </div>
 
-        <div className="card">
-          <h4>Time Studied</h4>
-          <p>{studyStats.totalTimeMinutes ? `${studyStats.totalTimeMinutes} minutes` : "N/A"}</p>
+        <div className="bg-gray-800 rounded-xl p-6 shadow-lg text-center">
+          <h4 className="text-lg font-semibold mb-2">Time Studied</h4>
+          <p className="text-indigo-400 text-3xl">
+            {studyStats.totalTimeMinutes ? `${studyStats.totalTimeMinutes} minutes` : "N/A"}
+          </p>
         </div>
 
-        <div className="card">
-          <h4>Live Study Time</h4>
-          <p>{formatTime(currentTime)}</p>
+        <div className="bg-gray-800 rounded-xl p-6 shadow-lg text-center">
+          <h4 className="text-lg font-semibold mb-2">Live Study Time</h4>
+          <p className="text-indigo-400 text-3xl">{formatTime(currentTime)}</p>
         </div>
       </div>
 
       {/* Chart */}
-      <div className="chart">
-        <h3>📈 Attentiveness Over Time</h3>
+      <section className="mb-12">
+        <h3 className="text-2xl font-semibold mb-6">📈 Attentiveness Over Time</h3>
         {history.length > 0 ? (
           <LineChart data={history} />
         ) : (
-          <p>No data recorded yet.</p>
+          <p className="text-gray-400 text-center">No data recorded yet.</p>
         )}
-      </div>
+      </section>
 
-      {/* Table */}
-      <div className="table-section">
-        <h3>📝 Session Log (Every 30 Minutes)</h3>
+      {/* Table Section */}
+      <section>
+        <h3 className="text-2xl font-semibold mb-6">📝 Session Log (Every 30 Minutes)</h3>
         {history.length > 0 ? (
-          <table>
-            <thead>
-              <tr>
-                <th>Time Interval</th>
-                <th>Avg Score</th>
-                <th>Dominant Emotion</th>
-                <th>Dominant State</th>
-              </tr>
-            </thead>
-            <tbody>
-              {history.map((entry, i) => (
-                <tr key={i}>
-                  <td>{entry.interval}</td>
-                  <td>{entry.avgScore}</td>
-                  <td>{entry.mostCommonEmotion || "–"}</td>
-                  <td>{entry.mostCommonState || "–"}</td>
+          <div className="overflow-x-auto rounded-lg border border-gray-700 shadow-lg">
+            <table className="min-w-full divide-y divide-gray-700 text-gray-300">
+              <thead className="bg-gray-800">
+                <tr>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Time Interval</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Avg Score</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Dominant Emotion</th>
+                  <th className="px-6 py-3 text-left text-sm font-semibold">Dominant State</th>
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody className="divide-y divide-gray-700">
+                {history.map((entry, i) => (
+                  <tr key={i} className="hover:bg-gray-800 transition-colors">
+                    <td className="px-6 py-3">{entry.interval}</td>
+                    <td className="px-6 py-3">{entry.avgScore}</td>
+                    <td className="px-6 py-3">{entry.mostCommonEmotion || "–"}</td>
+                    <td className="px-6 py-3">{entry.mostCommonState || "–"}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         ) : (
-          <p>No session logs yet.</p>
+          <p className="text-gray-400 text-center">No session logs yet.</p>
         )}
-      </div>
+      </section>
     </div>
   );
 }

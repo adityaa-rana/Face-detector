@@ -1,7 +1,4 @@
-// src/pages/Session/Session.js
-
 import React, { useEffect, useState, useRef } from 'react';
-import './Session.css';
 
 // Components
 import VideoInput from '../components/VideoInput';
@@ -25,7 +22,6 @@ export default function Session() {
   const [confidence, setConfidence] = useState(0);
   const [isSleeping, setIsSleeping] = useState(false);
 
-  // Frame capture every second
   useEffect(() => {
     const interval = setInterval(captureAndSendFrame, 1000);
     return () => clearInterval(interval);
@@ -60,6 +56,7 @@ export default function Session() {
         setIsSleeping(data.is_sleeping || false);
 
         if (data.feedback?.action === "break") {
+          setFeedback(data.feedback);
           setShowBreakModal(true);
         } else if (data.learning_state === "Confused") {
           setShowQuizModal(true);
@@ -90,35 +87,52 @@ export default function Session() {
   };
 
   return (
-    <div className="youtube-layout">
+    <div className="min-h-screen bg-gray-900 text-white flex flex-col">
       {/* Top Bar */}
-      <div className="top-bar">
-        <h1>🧠 AI Learning Coach</h1>
-        <form className="search-bar" onSubmit={(e) => e.preventDefault()}>
-          <input type="text" placeholder="Search topic or video..." />
-          <button type="submit">🔍</button>
+      <header className="flex items-center justify-between bg-gray-800 px-6 py-4 shadow-md">
+        <h1 className="text-3xl font-extrabold">🧠 AI Learning Coach</h1>
+        <form className="flex" onSubmit={(e) => e.preventDefault()}>
+          <input
+            type="text"
+            placeholder="Search topic or video..."
+            className="rounded-l-md px-4 py-2 w-60 text-gray-900 focus:outline-none"
+          />
+          <button
+            type="submit"
+            className="bg-indigo-600 hover:bg-indigo-700 px-4 py-2 rounded-r-md transition"
+          >
+            🔍
+          </button>
         </form>
-      </div>
+      </header>
 
-      {/* Main Content Area - Left: Video | Right: Webcam */}
-      <div className="main-content">
-        {/* Left Side - YouTube Player */}
-        <div className="left-panel">
+      {/* Main Content */}
+      <main className="flex flex-1 overflow-hidden px-6 py-8 gap-8">
+        {/* Left Panel - Video Input */}
+        <section className="flex-1 rounded-lg overflow-hidden shadow-lg bg-gray-800">
           <VideoInput breakTime={breakTime} />
-        </div>
+        </section>
 
-        {/* Right Side - Webcam Feed & Stats */}
-        <div className="right-panel">
-          <WebcamFeed emotion={emotion} score={score} confidence={confidence} isSleeping={isSleeping} />
-
-          <div className="stats-box">
-            <h3>🎯 Focus Score: {score}/10</h3>
-            <p><strong>Current Emotion:</strong> {emotion}</p>
-            <p><strong>Confidence:</strong> {parseFloat(confidence).toFixed(2)}</p>
-            {isSleeping && <p style={{ color: 'red' }}><strong>Sleep Detected!</strong></p>}
+        {/* Right Panel - Webcam and Stats */}
+        <aside className="w-96 flex flex-col gap-6">
+          <div className="rounded-lg overflow-hidden shadow-lg bg-gray-800">
+            <WebcamFeed
+              emotion={emotion}
+              score={score}
+              confidence={confidence}
+              isSleeping={isSleeping}
+            />
           </div>
-        </div>
-      </div>
+
+          <div className="bg-gray-800 rounded-lg p-4 shadow-lg text-center">
+            <h3 className="text-xl font-semibold mb-2">🎯 Focus Score</h3>
+            <p className="text-indigo-400 text-4xl">{((10 / 6) * score).toFixed(2)}/10</p>
+            {isSleeping && (
+              <p className="mt-3 text-red-500 font-bold animate-pulse">Sleep Detected!</p>
+            )}
+          </div>
+        </aside>
+      </main>
 
       {/* Modals */}
       {showBreakModal && feedback.message && (
@@ -128,11 +142,10 @@ export default function Session() {
           onTakeBreak={handleTakeAction}
         />
       )}
-
       {showQuizModal && <QuizModal onTakeQuiz={handleTakeQuiz} onSkip={() => setShowQuizModal(false)} />}
       {showSleepModal && <SleepModal onConfirm={handleRest} />}
 
-      <canvas ref={canvasRef} style={{ display: 'none' }} />
+      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }
